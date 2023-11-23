@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flask Socket.IO Chat</title>
+</head>
+<body>
+    {% if user.is_authenticated %}
+        <p>Welcome, {{ user.username }}!</p>
+        <p><a href="{{ url_for('logout') }}">Logout</a></p>
+    {% else %}
+        <p>Please <a href="{{ url_for('login') }}">login</a> to access the chat.</p>
+    {% endif %}
+    {% if user.is_authenticated %}
+        <ul id="messages"></ul>
+        <form id="form" action="">
+            <input id="message_input" autocomplete="off" /><button>Send</button>
+        </form>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+        <script>
+            var socket = io.connect('http://' + document.domain + ':' + location.port);
+            socket.on('message', function(msg) {
+                var ul = document.getElementById('messages');
+                var li = document.createElement('li');
+                li.appendChild(document.createTextNode(msg.user + ': ' + msg.msg));
+                ul.appendChild(li);
+            });
+            document.querySelector('form').onsubmit = function() {
+                var input = document.getElementById('message_input');
+                socket.emit('message', input.value);
+                input.value = '';
+                return false;
+            };
+        </script>
+    {% endif %}
+</body>
+</html>
